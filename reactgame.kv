@@ -1,0 +1,73 @@
+<CustomTextInput@TextInput>:
+    size_hint: 1 , None
+    height: 32 
+    background_color: 0.2, 0.29, 0.37, 1
+    multiline: False
+
+<MenuScreen>:
+    Widget:
+        size: 1024, 768
+        canvas.before:
+            Color:
+                rgba: 0.17, 0.24, 0.31, 1.0
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        BoxLayout:
+            orientation: 'vertical'
+            spacing: 5
+            pos: (root.width - self.width)/2, (root.height - self.height)/2
+            size: root.width*0.3, 96
+
+            CustomTextInput: 
+                id: name_input
+                hint_text: 'Name'
+                font_size: 16
+                multiline: False
+                on_text_validate: root.validate_input()
+
+            CustomTextInput: 
+                id: age_input
+                hint_text: 'Age'
+                font_size: 16
+                multiline: False
+                on_text_validate: root.validate_input()
+
+            CustomTextInput: 
+                id: sex_input
+                hint_text: 'Sex'
+                font_size: 16
+                multiline: False
+                on_text_validate: root.validate_input()
+        
+        Label:
+            id: error_label
+            text: ""
+            font_size: 16
+            color: 0.75, 0.22, 0.17, 1.0
+            pos: (root.width - self.width)/2, root.height*0.01
+
+<GameScreen>:
+    Widget:
+        size: 1024, 768
+        canvas.before:
+            Color:
+                rgba: root.r, root.g, root.b, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        
+        Label:
+            id: center_label
+            text: "start"
+            font_size: 32
+            color: 0, 0, 0, 1
+            pos: (root.width - self.width)/2, (root.height - self.height)/2
+
+        Label:
+            id: instruction_label
+            text: "press enter"
+            font_size: 16
+            color: 0, 0, 0, 1
+            pos: (root.width - self.width)/2, root.height*0.01
