@@ -97,8 +97,9 @@ class GameScreen(Screen):
                 self.instruction_label.text = ''
                 Clock.schedule_once(self.countdown, 0.1)
             if self.status == 'completed':
-                self.center_label = 'start'
+                self.center_label.text = 'start'
                 self.instruction_label.text = 'press enter'
+                self.count = 3
                 self.status = 'waiting'
 
         elif keycode[1] == 'spacebar':
@@ -106,6 +107,12 @@ class GameScreen(Screen):
                 self.pressed = True
                 self.reaction_time = time.clock() - self.flash_time
                 print self.reaction_time
+
+                if self.flash_count == FLASH_TIMES:
+                    self.center_label.text = 'done'
+                    self.instruction_label.text = 'press enter'
+                    self.set_color('gray')
+                    self.status = 'completed'
 
 	return True
 
@@ -116,10 +123,10 @@ class GameScreen(Screen):
 
             self.flash_count += 1
 
-            if self.flash_count < FLASH_TIMES:
+            if self.flash_count <= FLASH_TIMES:
                 Clock.schedule_once(self.clear_screen, 0.2)
                 Clock.schedule_once(self.flash, self.get_next_update())
-            elif self.flash_count == FLASH_TIMES:
+            elif self.flash_count > FLASH_TIMES:
                 self.center_label.text = 'done'
                 self.set_color('gray')
                 self.status = 'completed'
