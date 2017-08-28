@@ -19,10 +19,15 @@ MAX_DELAY = 4
 class DataHandler:
 
     def __init__(self):
-        pass
+        self.user_info = []
+    
+    def store_user_info(self, name, age, sex):
+        self.user_info = [name, age, sex]
 
-    def write(self):
-        pass
+    def write(self, round_no, incorrect_reactions, scores):
+        with open('game_report.csv', 'wb') as csvfile:
+            csvwriter = csv.writer(csvfile, delimiter=',')
+            csvwriter.writerow(self.user_info + [round_no] + scores)
 
 class MenuScreen(Screen):
 
@@ -30,9 +35,9 @@ class MenuScreen(Screen):
 	super(MenuScreen, self).__init__(**kwargs)
         self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
         self._keyboard.bind(on_key_down=self._on_keyboard_down)
-        self.name_input = self.ids.name_input
-        self.age_input = self.ids.age_input
-        self.sex_input = self.ids.sex_input
+        self.name = self.ids.name_input.text
+        self.age = self.ids.age_input.text
+        self.sex = self.ids.sex_input.text
         self.error_label = self.ids.error_label
 
     def _keyboard_closed(self):
@@ -44,21 +49,22 @@ class MenuScreen(Screen):
             keyboard.release()
         elif keycode[1] == 'enter':
             if self.validate_input():
-                dataHandler.write()
+                print "Here"
+                dataHandler.store_user_info(self.name, self.age, self.sex)
+                screenManager.current = 'game'
         else:
             self.display_error()
 
         return True
 
     def validate_input(self):
-        name = self.name_input.text
-        age = self.age_input.text
-        sex = self.sex_input.text
-        if((len(name) == 0) or (len(age) == 0) or (len(sex) == 0)):
+        if((len(self.name) == 0) or (len(self.age) == 0) or (len(self.sex) == 0)):
             self.error_label.text = "Please enter all values"
+            return False
+
         else:
-            print name, age, sex
-            screenManager.current = 'game'
+            print self.name, self.age, self.sex
+            return True
 
     def display_error(self):
         pass
@@ -128,6 +134,7 @@ class GameScreen(Screen):
                     self.instruction_label.text = 'press enter'
                     self.set_color('gray')
                     self.status = 'completed'
+                    dataHandler.write(self.round, self.incorrect_reactions, self.reaction_times)
 
 	return True
 
@@ -146,6 +153,7 @@ class GameScreen(Screen):
                 self.center_label.text = 'done'
                 self.set_color('gray')
                 self.status = 'completed'
+                dataHandler.write(self.round, self.incorrect_reactions, self.reaction_times)
 
             if self.pressed == False:
                 self.reaction_times.append(9)
@@ -197,6 +205,7 @@ class CustomTextInput(TextInput):
     pass
 
 screenManager = ScreenManager(transition=FadeTransition())
+dataHandler = DataHandler()
 
 class ReactGameApp(App):
 
@@ -204,7 +213,7 @@ class ReactGameApp(App):
         dataHandler = DataHandler()
         screenManager.add_widget(MenuScreen(name='menu'))
         screenManager.add_widget(GameScreen(name='game'))
-        screenManager.current = 'game'
+        screenManager.current = 'menu'
         return screenManager
 
 if __name__ == '__main__':
