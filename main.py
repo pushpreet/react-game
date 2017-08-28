@@ -1,22 +1,23 @@
 import kivy
-kivy.require('1.10.0')
+kivy.require('1.9.0')
 
 from kivy.app import App
 from kivy.uix.textinput import TextInput
-from kivy.core.window import Window 
+from kivy.core.window import Window
 from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition
 from kivy.clock import Clock
 from kivy.properties import NumericProperty
 
 import random
 import time
+import csv
 
 FLASH_TIMES = 5
 MIN_DELAY = 1.5
 MAX_DELAY = 4
 
 class DataHandler:
-    
+
     def __init__(self):
         pass
 
@@ -24,7 +25,7 @@ class DataHandler:
         pass
 
 class MenuScreen(Screen):
-    
+
     def __init__(self, **kwargs):
 	super(MenuScreen, self).__init__(**kwargs)
         self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
@@ -40,15 +41,15 @@ class MenuScreen(Screen):
 
     def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
 	if keycode[1] == 'escape':
-	    keyboard.release()
+            keyboard.release()
         elif keycode[1] == 'enter':
             if self.validate_input():
                 dataHandler.write()
-            else:
-                self.display_error()
+        else:
+            self.display_error()
 
-	return True
-    
+        return True
+
     def validate_input(self):
         name = self.name_input.text
         age = self.age_input.text
@@ -77,9 +78,12 @@ class GameScreen(Screen):
         self.status = 'waiting'
         self.count = 3
         self.flash_time = 0
-        self.reaction_time = 0
+        self.reaction_times = []
         self.flash_count = 0
         self.pressed = True
+        self.flashed = False
+        self.incorrect_reactions = 0
+        self.round = 1
 
     def _keyboard_closed(self):
         self._keyboard.unbind(on_key_down=self._on_keyboard_down)
@@ -100,13 +104,24 @@ class GameScreen(Screen):
                 self.center_label.text = 'start'
                 self.instruction_label.text = 'press enter'
                 self.count = 3
+                self.flash_count = 0
+                self.incorrect_reactions = 0
                 self.status = 'waiting'
+                self.pressed = True
+                self.flashed = False
+                self.round += 1
 
         elif keycode[1] == 'spacebar':
             if self.status == 'running':
                 self.pressed = True
-                self.reaction_time = time.clock() - self.flash_time
-                print self.reaction_time
+
+                if self.flashed:
+                    self.reaction_times.append(time.clock() - self.flash_time)
+                    print self.reaction_times[-1]
+                else:
+                    self.incorrect_reactions += 1
+
+                self.flashed = False
 
                 if self.flash_count == FLASH_TIMES:
                     self.center_label.text = 'done'
@@ -118,13 +133,14 @@ class GameScreen(Screen):
 
     def flash(self, *args):
         if self.status == 'running':
-            self.set_color('red') 
+            self.set_color('red')
             self.flash_time = time.clock()
 
             self.flash_count += 1
+            self.flashed = True
 
             if self.flash_count <= FLASH_TIMES:
-                Clock.schedule_once(self.clear_screen, 0.2)
+                Clock.schedule_once(self.clear_screen, 0.1)
                 Clock.schedule_once(self.flash, self.get_next_update())
             elif self.flash_count > FLASH_TIMES:
                 self.center_label.text = 'done'
@@ -132,13 +148,14 @@ class GameScreen(Screen):
                 self.status = 'completed'
 
             if self.pressed == False:
+                self.reaction_times.append(9)
                 print 9
-                
+
             self.pressed = False
 
     def clear_screen(self, *args):
         self.set_color('white')
-                
+
     def countdown(self, *args):
         if self.status == 'waiting':
             self.center_label.text = str(self.count)
