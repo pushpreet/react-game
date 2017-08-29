@@ -33,41 +33,35 @@ class MenuScreen(Screen):
 
     def __init__(self, **kwargs):
 	super(MenuScreen, self).__init__(**kwargs)
-        self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
-        self._keyboard.bind(on_key_down=self._on_keyboard_down)
-        self.name = self.ids.name_input.text
-        self.age = self.ids.age_input.text
-        self.sex = self.ids.sex_input.text
+        self.name_input = self.ids.name_input
+        self.age_input = self.ids.age_input
+        self.sex_input = self.ids.sex_input
         self.error_label = self.ids.error_label
 
-    def _keyboard_closed(self):
-        self._keyboard.unbind(on_key_down=self._on_keyboard_down)
-        self._keyboard = None
-
-    def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
+    def handle_event(self, keycode):
 	if keycode[1] == 'escape':
             keyboard.release()
+
         elif keycode[1] == 'enter':
             if self.validate_input():
-                print "Here"
-                dataHandler.store_user_info(self.name, self.age, self.sex)
+                dataHandler.store_user_info(self.name_input.text, self.age_input.text, self.sex_input.text)
                 screenManager.current = 'game'
-        else:
-            self.display_error()
+
+            else:
+                self.display_error()
 
         return True
 
     def validate_input(self):
-        if((len(self.name) == 0) or (len(self.age) == 0) or (len(self.sex) == 0)):
-            self.error_label.text = "Please enter all values"
+        if((len(self.name_input.text) == 0) or (len(self.age_input.text) == 0) or (len(self.sex_input.text) == 0)):
             return False
 
         else:
-            print self.name, self.age, self.sex
+            print self.name_input.text, self.age_input.text, self.sex_input.text
             return True
 
     def display_error(self):
-        pass
+        self.error_label.text = "Please enter all values"
 
 class GameScreen(Screen):
 
@@ -79,8 +73,6 @@ class GameScreen(Screen):
 	super(GameScreen, self).__init__(**kwargs)
         self.center_label = self.ids.center_label
         self.instruction_label = self.ids.instruction_label
-        self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
-        self._keyboard.bind(on_key_down=self._on_keyboard_down)
         self.status = 'waiting'
         self.count = 3
         self.flash_time = 0
@@ -91,18 +83,17 @@ class GameScreen(Screen):
         self.incorrect_reactions = 0
         self.round = 1
 
-    def _keyboard_closed(self):
-        self._keyboard.unbind(on_key_down=self._on_keyboard_down)
-        self._keyboard = None
-
-    def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
+    def handle_event(self, keycode):
 	if keycode[1] == 'escape':
             if self.status == 'waiting':
                 screenManager.current = 'menu'
             if self.status == 'running':
                 self.status = 'waiting'
+            if self.status = 'completed':
+                screenManager.current = 'menu'
 
         elif keycode[1] == 'enter':
+            print "Enter pressed"
             if self.status == 'waiting':
                 self.instruction_label.text = ''
                 Clock.schedule_once(self.countdown, 0.1)
@@ -201,9 +192,6 @@ class GameScreen(Screen):
         elif color == 2:
             self.set_color('blue')
 
-class CustomTextInput(TextInput):
-    pass
-
 screenManager = ScreenManager(transition=FadeTransition())
 dataHandler = DataHandler()
 
@@ -211,10 +199,22 @@ class ReactGameApp(App):
 
     def build(self):
         dataHandler = DataHandler()
+
         screenManager.add_widget(MenuScreen(name='menu'))
         screenManager.add_widget(GameScreen(name='game'))
-        screenManager.current = 'menu'
+
+        self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
+        self._keyboard.bind(on_key_down=self._on_keyboard_down)
+        
         return screenManager
+
+    def _keyboard_closed(self):
+        pass
+
+    def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
+        screenManager.current_screen.handle_event(keycode)
+        return True
+            
 
 if __name__ == '__main__':
     ReactGameApp().run()
