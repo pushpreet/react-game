@@ -11,10 +11,12 @@ from kivy.properties import NumericProperty
 import random
 import time
 import csv
+import os.path
 
 FLASH_TIMES = 5
 MIN_DELAY = 1.5
 MAX_DELAY = 4
+DATA_FILE_NAME = 'game_report.csv'
 
 class DataHandler:
 
@@ -24,10 +26,19 @@ class DataHandler:
     def store_user_info(self, name, age, sex):
         self.user_info = [name, age, sex]
 
+    def write_header(self):
+        if not os.path.isfile(DATA_FILE_NAME):
+            with open(DATA_FILE_NAME, 'a') as csvfile:
+                csvwriter = csv.writer(csvfile, delimiter=',')
+                header = ['Name', 'Age', 'Sex', 'Round', 'Incorrect Reactions']
+                [header.append('Reaction Time ' + str(num)) for num in range(1, FLASH_TIMES + 1)]
+                csvwriter.writerow(header)
+
     def write(self, round_no, incorrect_reactions, scores):
-        with open('game_report.csv', 'wb') as csvfile:
+        self.write_header()
+        with open(DATA_FILE_NAME, 'a') as csvfile:
             csvwriter = csv.writer(csvfile, delimiter=',')
-            csvwriter.writerow(self.user_info + [round_no] + scores)
+            csvwriter.writerow(self.user_info + [round_no] + [incorrect_reactions] + scores)
 
 class MenuScreen(Screen):
 
@@ -39,10 +50,7 @@ class MenuScreen(Screen):
         self.error_label = self.ids.error_label
 
     def handle_event(self, keycode):
-	if keycode[1] == 'escape':
-            keyboard.release()
-
-        elif keycode[1] == 'enter':
+        if keycode[1] == 'enter':
             if self.validate_input():
                 dataHandler.store_user_info(self.name_input.text, self.age_input.text, self.sex_input.text)
                 screenManager.current = 'game'
@@ -72,7 +80,12 @@ class GameScreen(Screen):
     def __init__(self, **kwargs):
 	super(GameScreen, self).__init__(**kwargs)
         self.center_label = self.ids.center_label
+        self.round_label = self.ids.round_label
         self.instruction_label = self.ids.instruction_label
+        self.round = 1
+        self.reset_game()
+
+    def reset_game(self):
         self.status = 'waiting'
         self.count = 3
         self.flash_time = 0
@@ -81,32 +94,27 @@ class GameScreen(Screen):
         self.pressed = True
         self.flashed = False
         self.incorrect_reactions = 0
-        self.round = 1
+        self.center_label.text = 'start'
+        self.instruction_label.text = 'press enter'
+        self.round_label.text = "round " + str(self.round)
 
     def handle_event(self, keycode):
 	if keycode[1] == 'escape':
             if self.status == 'waiting':
+                self.round = 1
                 screenManager.current = 'menu'
             if self.status == 'running':
-                self.status = 'waiting'
-            if self.status = 'completed':
+                self.reset_game()
+            if self.status == 'completed':
+                self.round = 1
                 screenManager.current = 'menu'
 
         elif keycode[1] == 'enter':
-            print "Enter pressed"
             if self.status == 'waiting':
-                self.instruction_label.text = ''
                 Clock.schedule_once(self.countdown, 0.1)
             if self.status == 'completed':
-                self.center_label.text = 'start'
-                self.instruction_label.text = 'press enter'
-                self.count = 3
-                self.flash_count = 0
-                self.incorrect_reactions = 0
-                self.status = 'waiting'
-                self.pressed = True
-                self.flashed = False
                 self.round += 1
+                self.reset_game()
 
         elif keycode[1] == 'spacebar':
             if self.status == 'running':
@@ -157,6 +165,8 @@ class GameScreen(Screen):
 
     def countdown(self, *args):
         if self.status == 'waiting':
+            self.instruction_label.text = ''
+            self.round_label.text = ''
             self.center_label.text = str(self.count)
             self.count -= 1
 
