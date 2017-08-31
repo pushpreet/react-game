@@ -272,7 +272,7 @@ class ReactGameApp(App):
         screenManager.add_widget(MenuScreen(name='menu'))
         screenManager.add_widget(GameScreen(name='game'))
 
-        self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
+        self._keyboard = Window.request_keyboard(self._keyboard_closed, self.root)
         self._keyboard.bind(on_key_down=self._on_keyboard_down)
         
         return screenManager
