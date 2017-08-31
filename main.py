@@ -8,6 +8,7 @@ from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition
 from kivy.clock import Clock
 from kivy.properties import NumericProperty
 from kivy.config import Config
+from kivy.core.audio import SoundLoader
 
 import random
 import time
@@ -34,17 +35,21 @@ class DataHandler:
         if not os.path.isfile(DATA_FILE_NAME):
             with open(DATA_FILE_NAME, 'a') as csvfile:
                 csvwriter = csv.writer(csvfile, delimiter=',')
-                header = ['Name', 'Age', 'Sex', 'Round', 'Incorrect Reactions']
+                header = ['Name', 'Age', 'Sex', 'Game Mode', 'Round', 'Incorrect Reactions']
                 [header.append('Reaction Time ' + str(num)) for num in range(1, FLASH_TIMES + 1)]
                 csvwriter.writerow(header)
 
-    def write(self, round_no, incorrect_reactions, scores):
+    def write(self, gameMode, round_no, incorrect_reactions, scores):
         self.write_header()
         with open(DATA_FILE_NAME, 'a') as csvfile:
             csvwriter = csv.writer(csvfile, delimiter=',')
-            csvwriter.writerow(self.user_info + [round_no] + [incorrect_reactions] + scores)
+            csvwriter.writerow(self.user_info + [gameMode] + [round_no] + [incorrect_reactions] + scores)
 
 class MenuScreen(Screen):
+
+    r = NumericProperty(0.17)
+    g = NumericProperty(0.24)
+    b = NumericProperty(0.31)
 
     def __init__(self, **kwargs):
 	super(MenuScreen, self).__init__(**kwargs)
@@ -56,26 +61,48 @@ class MenuScreen(Screen):
     def handle_event(self, keycode):
         if keycode[1] == 'escape':
             exit(1)
+
         if keycode[1] == 'enter':
             if self.validate_input():
-                dataHandler.store_user_info(self.name_input.text, self.age_input.text, self.sex_input.text)
+                dataHandler.store_user_info(self.name_input.text, self.age_input.text, self.sex_input.text.upper())
                 screenManager.current = 'game'
 
-            else:
-                self.display_error()
+        if keycode[1] == 'f2':
+            global gameMode
+            if gameMode == 'lambda':
+                gameMode = 'gamma'
+                self.r, self.g, self.b = 0.20, 0.29, 0.37
+            elif gameMode == 'gamma':
+                gameMode = 'lambda'
+                self.r, self.g, self.b = 0.17, 0.24, 0.31
 
         return True
 
     def validate_input(self):
         if((len(self.name_input.text) == 0) or (len(self.age_input.text) == 0) or (len(self.sex_input.text) == 0)):
+            self.display_error('incomplete')
             return False
 
+        elif not self.age_input.text.isdigit():
+            self.display_error('age')
+            return False
+
+        elif ((len(self.sex_input.text) != 1) or
+                (not (('M' in self.sex_input.text.upper()) or ('F' in self.sex_input.text.upper())))):
+            self.display_error('sex')
+            return False
         else:
             print self.name_input.text, self.age_input.text, self.sex_input.text
             return True
 
-    def display_error(self):
-        self.error_label.text = "Please enter all values"
+    def display_error(self, code):
+        if code == 'incomplete':
+            self.error_label.text = "Please enter all values"
+        elif code == 'age':
+            self.error_label.text = "Age should be a numeric value"
+        elif code == 'sex':
+            self.error_label.text = "Sex should either be M or F"
+
 
 class GameScreen(Screen):
 
@@ -88,8 +115,10 @@ class GameScreen(Screen):
         self.center_label = self.ids.center_label
         self.round_label = self.ids.round_label
         self.instruction_label = self.ids.instruction_label
+        self.mode_label = self.ids.mode_label
         self.round = 1
         self.reset_game()
+        self.mode_visible = False
 
     def reset_game(self):
         self.status = 'waiting'
@@ -135,13 +164,29 @@ class GameScreen(Screen):
                 self.flashed = False
 
                 if self.flash_count == FLASH_TIMES:
+                    global gameMode
                     self.center_label.text = 'done'
                     self.instruction_label.text = 'press enter'
                     self.set_color('gray')
                     self.status = 'completed'
-                    dataHandler.write(self.round, self.incorrect_reactions, self.reaction_times)
+                    dataHandler.write(gameMode, self.round, self.incorrect_reactions, self.reaction_times)
+
+        elif keycode[1] == 'f2':
+            if self.status == 'waiting' or self.status == 'completed':
+                self.show_mode()
 
 	return True
+    
+    def show_mode(self, *args):
+        global gameMode
+        if self.mode_visible:
+            self.mode_label.text = ''
+            self.mode_visible = False
+        else:
+            self.mode_label.text = gameMode
+            self.mode_visible = True
+            Clock.schedule_once(self.show_mode, 0.5)
+        
 
     def flash(self, *args):
         if self.status == 'running':
@@ -155,10 +200,11 @@ class GameScreen(Screen):
                 Clock.schedule_once(self.clear_screen, 0.1)
                 Clock.schedule_once(self.flash, self.get_next_update())
             elif self.flash_count > FLASH_TIMES:
+                global gameMode
                 self.center_label.text = 'done'
                 self.set_color('gray')
                 self.status = 'completed'
-                dataHandler.write(self.round, self.incorrect_reactions, self.reaction_times)
+                dataHandler.write(self.gameMode, self.round, self.incorrect_reactions, self.reaction_times)
 
             if self.pressed == False:
                 self.reaction_times.append(9)
@@ -210,6 +256,8 @@ class GameScreen(Screen):
 
 screenManager = ScreenManager(transition=FadeTransition())
 dataHandler = DataHandler()
+beep = SoundLoader.load('assets/beep.wav')
+gameMode = 'lambda'
 
 class ReactGameApp(App):
 

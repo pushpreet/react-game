@@ -2,13 +2,14 @@
     size_hint: 1 , None
     height: 32 
     background_color: 0.2, 0.29, 0.37, 1
+    foreground_color: 1, 1, 1, 1
     multiline: False
 
 <MenuScreen>:
     Widget:
         canvas.before:
             Color:
-                rgba: 0.17, 0.24, 0.31, 1.0
+                rgba: root.r, root.g, root.b, 1
             Rectangle:
                 pos: self.pos
                 size: self.size
@@ -76,3 +77,10 @@
             font_size: 16
             color: 0, 0, 0, 1
             pos: (root.width - self.width)/2, root.height*0.01
+
+        Label:
+            id: mode_label
+            text: ''
+            font_size: 12
+            color: 0, 0, 0, 1
+            pos: (root.width - self.width)/2, root.height*0.9
