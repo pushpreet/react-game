@@ -6,7 +6,6 @@
 
 <MenuScreen>:
     Widget:
-        size: 1024, 768
         canvas.before:
             Color:
                 rgba: 0.17, 0.24, 0.31, 1.0
@@ -16,9 +15,9 @@
 
         BoxLayout:
             orientation: 'vertical'
-            spacing: 5
+            spacing: 10
             pos: (root.width - self.width)/2, (root.height - self.height)/2
-            size: root.width*0.3, 96
+            size: root.width*0.2, 96
 
             CustomTextInput: 
                 id: name_input
@@ -50,7 +49,6 @@
 
 <GameScreen>:
     Widget:
-        size: 1024, 768
         canvas.before:
             Color:
                 rgba: root.r, root.g, root.b, 1

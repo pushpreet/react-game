@@ -7,11 +7,15 @@ from kivy.core.window import Window
 from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition
 from kivy.clock import Clock
 from kivy.properties import NumericProperty
+from kivy.config import Config
 
 import random
 import time
 import csv
 import os.path
+
+Config.set('graphics', 'fullscreen', 'auto')
+Config.write()
 
 FLASH_TIMES = 5
 MIN_DELAY = 1.5
@@ -50,6 +54,8 @@ class MenuScreen(Screen):
         self.error_label = self.ids.error_label
 
     def handle_event(self, keycode):
+        if keycode[1] == 'escape':
+            exit(1)
         if keycode[1] == 'enter':
             if self.validate_input():
                 dataHandler.store_user_info(self.name_input.text, self.age_input.text, self.sex_input.text)
