@@ -103,7 +103,6 @@ class MenuScreen(Screen):
         elif code == 'sex':
             self.error_label.text = "Sex should either be M or F"
 
-
 class GameScreen(Screen):
 
     r = NumericProperty(0.7)
@@ -137,11 +136,13 @@ class GameScreen(Screen):
 	if keycode[1] == 'escape':
             if self.status == 'waiting':
                 self.round = 1
+                self.reset_game()
                 screenManager.current = 'menu'
             if self.status == 'running':
                 self.reset_game()
             if self.status == 'completed':
                 self.round = 1
+                self.reset_game()
                 screenManager.current = 'menu'
 
         elif keycode[1] == 'enter':
@@ -153,6 +154,7 @@ class GameScreen(Screen):
 
         elif keycode[1] == 'spacebar':
             if self.status == 'running':
+                global gameMode
                 self.pressed = True
 
                 if self.flashed:
@@ -164,12 +166,15 @@ class GameScreen(Screen):
                 self.flashed = False
 
                 if self.flash_count == FLASH_TIMES:
-                    global gameMode
                     self.center_label.text = 'done'
                     self.instruction_label.text = 'press enter'
                     self.set_color('gray')
                     self.status = 'completed'
                     dataHandler.write(gameMode, self.round, self.incorrect_reactions, self.reaction_times)
+                else:
+                    if gameMode == 'gamma':
+                        if random.randint(0, 2) == 2:
+                            beep.play()
 
         elif keycode[1] == 'f2':
             if self.status == 'waiting' or self.status == 'completed':
