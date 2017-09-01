@@ -23,6 +23,20 @@ MIN_DELAY = 1.5
 MAX_DELAY = 4
 DATA_FILE_NAME = 'game_report.csv'
 
+with open('config.txt', 'rb') as configFile:
+    configuration = configFile.readlines()
+
+    for config in configuration:
+        config.strip()
+        if 'FLASH_TIMES' in config:
+            FLASH_TIMES = config.split('= ')[1]
+        elif 'MIN_DELAY' in config:
+            MIN_DELAY = config.split('= ')[1]
+        elif 'MAX_DELAY' in config:
+            MAX_DELAY = config.split('= ')[1]
+        elif 'DATA_FILE_NAME' in config:
+            DATA_FILE_NAME = config.split('= ')[1]
+
 class DataHandler:
 
     def __init__(self):
