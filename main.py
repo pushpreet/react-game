@@ -195,7 +195,7 @@ class GameScreen(Screen):
 
     def flash(self, *args):
         if self.status == 'running':
-            self.set_color('red')
+            self.set_color('dark-grey')
             self.flash_time = time.clock()
 
             self.flash_count += 1
@@ -249,6 +249,8 @@ class GameScreen(Screen):
             self.r, self.g, self.b = 1, 1, 1
         elif color == 'gray':
             self.r, self.g, self.b = 0.7, 0.7, 0.7
+        elif color == 'dark-grey':
+            self.r, self.g, self.b = 0.22, 0.28, 0.31
 
     def set_random_color(self):
         color = random.randint(0, 3)
