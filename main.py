@@ -18,7 +18,7 @@ import os.path
 Config.set('graphics', 'fullscreen', 'auto')
 Config.write()
 
-FLASH_TIMES = 5
+FLASH_TIMES = 30
 MIN_DELAY = 1.5
 MAX_DELAY = 4
 DATA_FILE_NAME = 'game_report.csv'
@@ -158,7 +158,7 @@ class GameScreen(Screen):
                 self.pressed = True
 
                 if self.flashed:
-                    self.reaction_times.append(time.clock() - self.flash_time)
+                    self.reaction_times.append("{0:.2f}".format((time.clock() - self.flash_time)*1000))
                     print self.reaction_times[-1]
                 else:
                     self.incorrect_reactions += 1
