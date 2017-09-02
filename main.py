@@ -37,8 +37,6 @@ with open('config.txt', 'rb') as configFile:
         elif 'DATA_FILE_NAME' in config:
             DATA_FILE_NAME = config.split('= ')[1]
 
-print DATA_FILE_NAME
-
 class DataHandler:
 
     def __init__(self):
@@ -225,7 +223,7 @@ class GameScreen(Screen):
                 self.center_label.text = 'done'
                 self.set_color('gray')
                 self.status = 'completed'
-                dataHandler.write(self.gameMode, self.round, self.incorrect_reactions, self.reaction_times)
+                dataHandler.write(gameMode, self.round, self.incorrect_reactions, self.reaction_times)
 
             if self.pressed == False:
                 self.reaction_times.append(9)

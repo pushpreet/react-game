@@ -1,4 +1,4 @@
-FLASH_TIME = 30
+FLASH_TIMES = 3
 MIN_DELAY = 1.5
 MAX_DELAY = 4
-DATA_FILE_NAME = 'game_report.csv'
+DATA_FILE_NAME = 'report.csv'
