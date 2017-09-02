@@ -29,11 +29,11 @@ with open('config.txt', 'rb') as configFile:
     for config in configuration:
         config.strip()
         if 'FLASH_TIMES' in config:
-            FLASH_TIMES = config.split('= ')[1]
+            FLASH_TIMES = int(config.split('= ')[1])
         elif 'MIN_DELAY' in config:
-            MIN_DELAY = config.split('= ')[1]
+            MIN_DELAY = float(config.split('= ')[1])
         elif 'MAX_DELAY' in config:
-            MAX_DELAY = config.split('= ')[1]
+            MAX_DELAY = float(config.split('= ')[1])
         elif 'DATA_FILE_NAME' in config:
             DATA_FILE_NAME = config.split('= ')[1]
 
