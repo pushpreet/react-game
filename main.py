@@ -27,7 +27,7 @@ with open('config.txt', 'rb') as configFile:
     configuration = configFile.readlines()
 
     for config in configuration:
-        config.strip()
+        config = config.strip()
         if 'FLASH_TIMES' in config:
             FLASH_TIMES = int(config.split('= ')[1])
         elif 'MIN_DELAY' in config:
@@ -36,6 +36,8 @@ with open('config.txt', 'rb') as configFile:
             MAX_DELAY = float(config.split('= ')[1])
         elif 'DATA_FILE_NAME' in config:
             DATA_FILE_NAME = config.split('= ')[1]
+
+print DATA_FILE_NAME
 
 class DataHandler:
 
