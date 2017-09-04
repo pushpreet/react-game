@@ -21,6 +21,7 @@ Config.write()
 FLASH_TIMES = 30
 MIN_DELAY = 1.5
 MAX_DELAY = 4
+BEEP_PERCENTAGE = 50
 DATA_FILE_NAME = 'game_report.csv'
 
 with open('config.txt', 'rb') as configFile:
@@ -34,6 +35,8 @@ with open('config.txt', 'rb') as configFile:
             MIN_DELAY = float(config.split('= ')[1])
         elif 'MAX_DELAY' in config:
             MAX_DELAY = float(config.split('= ')[1])
+        elif 'BEEP_PERCENTAGE' in config:
+            BEEP_PERCENTAGE = float(config.split('= ')[1])
         elif 'DATA_FILE_NAME' in config:
             DATA_FILE_NAME = config.split('= ')[1]
 
@@ -50,7 +53,7 @@ class DataHandler:
             with open(DATA_FILE_NAME, 'a') as csvfile:
                 csvwriter = csv.writer(csvfile, delimiter=',')
                 header = ['Name', 'Age', 'Sex', 'Game Mode', 'Round', 'Incorrect Reactions']
-                [header.append('Reaction Time ' + str(num)) for num in range(1, FLASH_TIMES + 1)]
+                [header.append('T' + str(num)) for num in range(1, FLASH_TIMES + 1)]
                 csvwriter.writerow(header)
 
     def write(self, gameMode, round_no, incorrect_reactions, scores):
@@ -172,7 +175,7 @@ class GameScreen(Screen):
                 self.pressed = True
 
                 if self.flashed:
-                    self.reaction_times.append("{0:.2f}".format((time.clock() - self.flash_time)*1000))
+                    self.reaction_times.append("{0:.5f}".format(time.clock() - self.flash_time))
                     print self.reaction_times[-1]
                 else:
                     self.incorrect_reactions += 1
@@ -187,7 +190,7 @@ class GameScreen(Screen):
                     dataHandler.write(gameMode, self.round, self.incorrect_reactions, self.reaction_times)
                 else:
                     if gameMode == 'gamma':
-                        if random.randint(0, 2) == 2:
+                        if random.randint(1, 100/BEEP_PERCENTAGE) == 1:
                             beep.play()
 
         elif keycode[1] == 'f2':
@@ -223,6 +226,7 @@ class GameScreen(Screen):
                 self.center_label.text = 'done'
                 self.set_color('gray')
                 self.status = 'completed'
+                self.reaction_times.append(9)
                 dataHandler.write(gameMode, self.round, self.incorrect_reactions, self.reaction_times)
 
             if self.pressed == False:
@@ -299,7 +303,6 @@ class ReactGameApp(App):
     def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
         screenManager.current_screen.handle_event(keycode)
         return True
-            
 
 if __name__ == '__main__':
     ReactGameApp().run()
