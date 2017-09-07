@@ -74,24 +74,39 @@ class MenuScreen(Screen):
         self.age_input = self.ids.age_input
         self.sex_input = self.ids.sex_input
         self.error_label = self.ids.error_label
+        self.mode_visible = False
+        self.mode_label = self.ids.mode_label
+        Clock.schedule_once(self.set_focus, 0.5)
 
     def handle_event(self, keycode):
+        global gameMode
         if keycode[1] == 'escape':
             exit(1)
 
-        if keycode[1] == 'enter':
+        elif keycode[1] == 'enter':
             if self.validate_input():
                 dataHandler.store_user_info(self.name_input.text, self.age_input.text, self.sex_input.text.upper())
                 screenManager.current = 'game'
 
-        if keycode[1] == 'f2':
-            global gameMode
-            if gameMode == 'lambda':
-                gameMode = 'gamma'
-                self.r, self.g, self.b = 0.20, 0.29, 0.37
-            elif gameMode == 'gamma':
-                gameMode = 'lambda'
-                self.r, self.g, self.b = 0.17, 0.24, 0.31
+        elif keycode[1] == 'f1':    # normal mode with no beeps
+            gameMode = 'alpha'
+            self.show_mode()
+
+        elif keycode[1] == 'f2':    # distraction mode with beeps randomly on keypress
+            gameMode = 'beta'
+            self.show_mode()
+        
+        elif keycode[1] == 'f3':    # normal mode with beeps at every keypress
+            gameMode = 'gamma'
+            self.show_mode()
+
+        elif keycode[1] == 'f4':    # distraction mode with randomly missing beeps at keypress
+            gameMode = 'lambda'
+            self.show_mode()
+
+        elif keycode[1] == 'f5':    # distraction mode with blank screen at random places
+            gameMode = 'eta'
+            self.show_mode()
 
         return True
 
@@ -119,6 +134,19 @@ class MenuScreen(Screen):
             self.error_label.text = "Age should be a numeric value"
         elif code == 'sex':
             self.error_label.text = "Sex should either be M or F"
+
+    def set_focus(self, *args):
+        self.name_input.focus = True
+
+    def show_mode(self, *args):
+        global gameMode
+        if self.mode_visible:
+            self.mode_label.text = ''
+            self.mode_visible = False
+        else:
+            self.mode_label.text = gameMode
+            self.mode_visible = True
+            Clock.schedule_once(self.show_mode, 0.5)
 
 class GameScreen(Screen):
 
@@ -148,6 +176,7 @@ class GameScreen(Screen):
         self.center_label.text = 'start'
         self.instruction_label.text = 'press enter'
         self.round_label.text = "round " + str(self.round)
+        self.noBeep = False
 
     def handle_event(self, keycode):
 	if keycode[1] == 'escape':
@@ -177,7 +206,7 @@ class GameScreen(Screen):
                 if self.flashed:
                     self.reaction_times.append("{0:.5f}".format(time.clock() - self.flash_time))
                     print self.reaction_times[-1]
-                else:
+                elif not self.noBeep:
                     self.incorrect_reactions += 1
 
                 self.flashed = False
@@ -188,10 +217,26 @@ class GameScreen(Screen):
                     self.set_color('gray')
                     self.status = 'completed'
                     dataHandler.write(gameMode, self.round, self.incorrect_reactions, self.reaction_times)
-                else:
-                    if gameMode == 'gamma':
-                        if random.randint(1, 100/BEEP_PERCENTAGE) == 1:
-                            beep.play()
+                    
+                if gameMode == 'alpha':
+                    pass
+
+                elif gameMode == 'beta':
+                    if random.randint(1, 100/BEEP_PERCENTAGE) == 1:
+                        beep.play()
+
+                elif gameMode == 'gamma':
+                    beep.play()
+
+                elif gameMode == 'lambda':
+                    if (random.randint(1, 100/BEEP_PERCENTAGE) != 1) or self.noBeep or (self.flash_count == FLASH_TIMES):
+                        beep.play()
+                        self.noBeep = False
+                    else:
+                        self.noBeep = True
+
+                elif gameMode == 'eta':
+                    pass
 
         elif keycode[1] == 'f2':
             if self.status == 'waiting' or self.status == 'completed':
@@ -282,7 +327,7 @@ class GameScreen(Screen):
 screenManager = ScreenManager(transition=FadeTransition())
 dataHandler = DataHandler()
 beep = SoundLoader.load('assets/beep.wav')
-gameMode = 'lambda'
+gameMode = 'alpha'
 
 class ReactGameApp(App):
 
