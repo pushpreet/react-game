@@ -119,10 +119,6 @@ class MenuScreen(Screen):
             self.display_error('age')
             return False
 
-        elif ((len(self.sex_input.text) != 1) or
-                (not (('M' in self.sex_input.text.upper()) or ('F' in self.sex_input.text.upper())))):
-            self.display_error('sex')
-            return False
         else:
             print self.name_input.text, self.age_input.text, self.sex_input.text
             return True
@@ -133,7 +129,7 @@ class MenuScreen(Screen):
         elif code == 'age':
             self.error_label.text = "Age should be a numeric value"
         elif code == 'sex':
-            self.error_label.text = "Sex should either be M or F"
+            self.error_label.text = "Sex should not be left empty"
 
     def set_focus(self, *args):
         self.name_input.focus = True
@@ -238,7 +234,7 @@ class GameScreen(Screen):
                 elif gameMode == 'eta':
                     pass
 
-        elif keycode[1] == 'f2':
+        elif keycode[1] == 'f12':
             if self.status == 'waiting' or self.status == 'completed':
                 self.show_mode()
 
