@@ -23,6 +23,8 @@ MIN_DELAY = 1.5
 MAX_DELAY = 4
 BEEP_PERCENTAGE = 50
 DATA_FILE_NAME = 'game_report.csv'
+HEADING = 'Task'
+BEEP_FILE = 'beep.csv'
 
 with open('config.txt', 'rb') as configFile:
     configuration = configFile.readlines()
@@ -39,6 +41,10 @@ with open('config.txt', 'rb') as configFile:
             BEEP_PERCENTAGE = float(config.split('= ')[1])
         elif 'DATA_FILE_NAME' in config:
             DATA_FILE_NAME = config.split('= ')[1]
+        elif 'HEADING' in config:
+            HEADING = config.split('= ')[1]
+        elif 'BEEP_FILE' in config:
+            BEEP_FILE = config.split('= ')[1]
 
 class DataHandler:
 
@@ -89,13 +95,14 @@ class MenuScreen(Screen):
                 screenManager.current = 'game'
 
         elif keycode[1] == 'f1':    # normal mode with no beeps
-            gameMode = 'alpha'
+            gameMode = 'gamma'
             self.show_mode()
 
         elif keycode[1] == 'f2':    # distraction mode with beeps randomly on keypress
-            gameMode = 'beta'
+            gameMode = 'lambda'
             self.show_mode()
         
+        '''
         elif keycode[1] == 'f3':    # normal mode with beeps at every keypress
             gameMode = 'gamma'
             self.show_mode()
@@ -107,6 +114,7 @@ class MenuScreen(Screen):
         elif keycode[1] == 'f5':    # distraction mode with blank screen at random places
             gameMode = 'eta'
             self.show_mode()
+        '''
 
         return True
 
@@ -322,7 +330,7 @@ class GameScreen(Screen):
 
 screenManager = ScreenManager(transition=FadeTransition())
 dataHandler = DataHandler()
-beep = SoundLoader.load('assets/beep.wav')
+beep = SoundLoader.load('assets/' + BEEP_FILE)
 gameMode = 'alpha'
 
 class ReactGameApp(App):

@@ -3,3 +3,5 @@ MIN_DELAY = 1.5
 MAX_DELAY = 4
 BEEP_PERCENTAGE = 50
 DATA_FILE_NAME = report.csv
+HEADING = task
+BEEP_FILE = beep.wav
