@@ -25,6 +25,7 @@ BEEP_PERCENTAGE = 50
 DATA_FILE_NAME = 'game_report.csv'
 HEADING = 'Task'
 BEEP_FILE = 'beep.csv'
+SHOW_COUNTDOWN = 1
 
 with open('config.txt', 'rb') as configFile:
     configuration = configFile.readlines()
@@ -45,6 +46,8 @@ with open('config.txt', 'rb') as configFile:
             HEADING = config.split('= ')[1]
         elif 'BEEP_FILE' in config:
             BEEP_FILE = config.split('= ')[1]
+        elif 'SHOW_COUNTDOWN' in config:
+            SHOW_COUNTDOWN = int(config.split('= ')[1])
 
 class DataHandler:
 
@@ -291,7 +294,10 @@ class GameScreen(Screen):
         if self.status == 'waiting':
             self.instruction_label.text = ''
             self.round_label.text = ''
-            self.center_label.text = str(self.count)
+            if SHOW_COUNTDOWN == 1:
+                self.center_label.text = str(self.count)
+            else:
+                self.center_label.text = ''
             self.count -= 1
 
             if self.count == -1:

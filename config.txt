@@ -5,3 +5,4 @@ BEEP_PERCENTAGE = 50
 DATA_FILE_NAME = report.csv
 HEADING = task
 BEEP_FILE = beep.wav
+SHOW_COUNTDOWN = 0
