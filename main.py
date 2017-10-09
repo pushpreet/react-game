@@ -331,7 +331,7 @@ class GameScreen(Screen):
 screenManager = ScreenManager(transition=FadeTransition())
 dataHandler = DataHandler()
 beep = SoundLoader.load('assets/' + BEEP_FILE)
-gameMode = 'alpha'
+gameMode = 'gamma'
 
 class ReactGameApp(App):
 
