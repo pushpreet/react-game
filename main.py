@@ -23,7 +23,7 @@ MIN_DELAY = 1.5
 MAX_DELAY = 4
 BEEP_PERCENTAGE = 50
 DATA_FILE_NAME = 'game_report.csv'
-HEADING = 'Task'
+TITLE = 'Task'
 BEEP_FILE = 'beep.csv'
 SHOW_COUNTDOWN = 1
 
@@ -42,8 +42,8 @@ with open('config.txt', 'rb') as configFile:
             BEEP_PERCENTAGE = float(config.split('= ')[1])
         elif 'DATA_FILE_NAME' in config:
             DATA_FILE_NAME = config.split('= ')[1]
-        elif 'HEADING' in config:
-            HEADING = config.split('= ')[1]
+        elif 'TITLE' in config:
+            TITLE = config.split('= ')[1]
         elif 'BEEP_FILE' in config:
             BEEP_FILE = config.split('= ')[1]
         elif 'SHOW_COUNTDOWN' in config:
@@ -340,6 +340,7 @@ beep = SoundLoader.load('assets/' + BEEP_FILE)
 gameMode = 'gamma'
 
 class ReactGameApp(App):
+    title = TITLE
 
     def build(self):
         dataHandler = DataHandler()
