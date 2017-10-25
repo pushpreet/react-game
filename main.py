@@ -350,6 +350,7 @@ class ReactGameApp(App):
 
         self._keyboard = Window.request_keyboard(self._keyboard_closed, self.root)
         self._keyboard.bind(on_key_down=self._on_keyboard_down)
+        Window.set_title(TITLE)
         
         return screenManager
 
