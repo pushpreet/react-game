@@ -292,6 +292,7 @@ class GameScreen(Screen):
 
     def countdown(self, *args):
         if self.status == 'waiting':
+            self.set_color('white')
             self.instruction_label.text = ''
             self.round_label.text = ''
             if SHOW_COUNTDOWN == 1:
